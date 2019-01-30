@@ -1,20 +1,20 @@
-
-
+# File of filters functions. Can be added
 def lowpassfilter(par, k=0.2):
-    parF=[]
+    parf=[]
     for i in range(len(par)):
         if i == 0:
-            parF.append(par[i])
+            parf.append(par[i])
         else:
-            parF.append(parF[i-1]+k*(par[i]-parF[i-1]))
-    return parF
+            parf.append(parf[i-1]+k*(par[i]-parf[i-1]))
+    return parf
 
 
 def highpassfilter(par, k=0.2):
-    parF=[]
+    parf = []
     for i in range(len(par)):
         if i == 0:
-            parF.append(par[i])
+            parf.append(par[i])
         else:
-            parF.append(par[i]-(parF[i-1]+k*(par[i]-parF[i-1])))
-    return parF
+            parf.append(par[i]-(parf[i-1]+k*(par[i]-parf[i-1])))
+    return parf
+
