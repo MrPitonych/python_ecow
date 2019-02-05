@@ -1,4 +1,6 @@
 # Test file for all functions
+"""File for test all packets and modules. It's draft"""
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
@@ -116,6 +118,7 @@ d={'time':time1,'gFx': Ax1,'gFy': Ay1, 'gFz':Az1}
 frame = pd.DataFrame(data =d)
 frame.to_csv('new_data2.csv', index=False)
 
+print(help(pr.meanpar))
 #It's for exam methods
 '''
 print("With Ay1, VeDBA1")
