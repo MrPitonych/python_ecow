@@ -112,6 +112,7 @@ Az1 = pr.meanpar(Az, 3500)
 #SD = pr.sd(Ax, 3500)
 #SDy = pr.sd(Ay, 3500)
 #quan = pr.quantiles(Ax, 3500, 0.1)
+
 time1 = pr.meantime(time, 3500)
 print(time1)
 d={'time':time1,'gFx': Ax1,'gFy': Ay1, 'gFz':Az1}

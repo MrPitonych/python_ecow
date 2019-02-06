@@ -165,8 +165,9 @@ def signalMagnitudeArea(x, y, z, timewindow):
                             x (list): Series data from x channel.
                             y (list): Series data from y channel.
                             z (list): Series data from z channel.
+                            timewindow(int): Time window for separation series.
                         Returns:
-                            list: The return value sma. Size: len(x)
+                            list: The return value sma. Size: time series/timewindow.
     """
     res = []
     for i in range(math.floor(len(x) / timewindow)):
