@@ -108,7 +108,7 @@ Az1 = pr.meanpar(Az, 3500)
 VeDBA = pr.vedba(Ax, Ay, Az)
 VeDBA1 = pr.meanpar(VeDBA, 3500)
 VeDBAmeanXYZ = pr.vedba(Ax1, Ay1, Az1)
-
+MV = pr.movementVariation(Ax, Ay, Az, 3500)
 
 time1 = pr.meantime(time, 3500)
 
@@ -118,5 +118,21 @@ frame.to_csv('new_data2.csv', index=False)
 
 #It's for exam methods
 
-print(VeDBAmeanXYZ)
-print(VeDBA1)
+f1 = [],[]
+for i in range(100):
+   (f1_rf, f1_lda) = main(MV, Quan05X, Class)
+   f1[0].append(f1_rf)
+   f1[1].append(f1_lda)
+
+print("RF-median: ", float(np.median(f1[0])), "LDA-median: ", float(np.median(f1[1])))
+print("RF-min: ", float(np.min(f1[0])), "LDA-min: ", float(np.min(f1[1])))
+
+print("****************With VeDBA1, Quan05Xmean****************")
+f1 = [],[]
+for i in range(100):
+   (f1_rf, f1_lda) = main(MV, Quan05X, Class)
+   f1[0].append(f1_rf)
+   f1[1].append(f1_lda)
+
+print("RF-median: ", float(np.median(f1[0])), "LDA-median: ", float(np.median(f1[1])))
+print("RF-min: ", float(np.min(f1[0])), "LDA-min: ", float(np.min(f1[1])))

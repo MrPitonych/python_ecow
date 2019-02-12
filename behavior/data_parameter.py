@@ -17,11 +17,11 @@ def meanpar(param, timewindow):
             list: The return value. Size: series/timewindow.
     """
     parm = []
-    for i in range(math.floor(len(param)/timewindow)): # lost data
+    for i in range(math.floor(len(param) / timewindow)):  # lost data
         sum1 = 0
         for j in range(timewindow):
-                sum1 += param[j+(timewindow *(i))]
-        parm.append(sum1/timewindow)
+            sum1 += param[j + (timewindow * (i))]
+        parm.append(sum1 / timewindow)
     return parm
 
 
@@ -38,7 +38,7 @@ def meantime(param, timewindow):
     sum = 0
     itinsec = 55
     for i in range(math.floor(len(param) / timewindow)):
-        sum += timewindow/itinsec
+        sum += timewindow / itinsec
         parm.append(sum)
 
     return parm
@@ -70,7 +70,7 @@ def odba(x, y, z):
                     list: The return value odba.Size: len(x)
     """
     res = []
-    for i in range(len(x)): # test for length x=y=z
+    for i in range(len(x)):  # test for length x=y=z
         res.append(abs(x[i] + y[i] + z[i]))
     return res
 
@@ -87,7 +87,7 @@ def vedba(x, y, z):
     """
     res = []
     for i in range(len(x)):
-        res.append(math.sqrt(pow(x[i], 2)+pow(y[i], 2)+pow(z[i], 2)))
+        res.append(math.sqrt(pow(x[i], 2) + pow(y[i], 2) + pow(z[i], 2)))
     return res
 
 
@@ -103,7 +103,7 @@ def quantiles(param, timewindow, k=0.5):
     """
     res = subfunc(param, timewindow)
     for i in range(math.floor(len(param) / timewindow)):
-        res[i]= pd.Series(res[i]).quantile(k)
+        res[i] = pd.Series(res[i]).quantile(k)
     return res
 
 
@@ -118,7 +118,7 @@ def skewness(param, timewindow):
     """
     res = subfunc(param, timewindow)
     for i in range(math.floor(len(param) / timewindow)):
-            res[i] = pd.Series(res[i]).skew()
+        res[i] = pd.Series(res[i]).skew()
     return res
 
 
@@ -148,7 +148,7 @@ def paintkde(par, timewindow, n):
     """
     res = []
     try:
-        print(par[(timewindow-1) + (timewindow * (n))])
+        print(par[(timewindow - 1) + (timewindow * (n))])
     except:
         print('Out of range, n =0')
         n = 0
@@ -157,6 +157,21 @@ def paintkde(par, timewindow, n):
     pd.Series(res).plot(kind='kde')
     plt.show()
 
+# new
+def averageIntensity(x, y, z):
+    """ Function  for calculate Average Intensity (AI) in time window series .
+
+                    Args:
+                        x (list): Series data from x channel.
+                        y (list): Series data from y channel.
+                        z (list): Series data from z channel.
+                    Returns:
+                        list: The return value AI. Size: len(x)
+    """
+    res = []
+    for i in range(len(x)):
+        res.append((math.sqrt(pow(x[i], 2) + pow(y[i], 2) + pow(z[i], 2))) / len(x))
+    return res
 
 def signalMagnitudeArea(x, y, z, timewindow):
     """ Function  for calculate signal Magnitude Area in time window series.
@@ -173,11 +188,12 @@ def signalMagnitudeArea(x, y, z, timewindow):
     for i in range(math.floor(len(x) / timewindow)):
         subpar = []
         for j in range(timewindow):
-            subpar.append((abs(x[j + (timewindow * (i))])+abs(y[j + (timewindow * (i))])
+            subpar.append((abs(x[j + (timewindow * (i))]) + abs(y[j + (timewindow * (i))]) # тут бы на кол-во элементов поделить
                            + abs(z[j + (timewindow * (i))])))
-        res.append(subpar[i]/timewindow)
+        res.append(subpar[i] / timewindow)
     return res
 
+# new
 def movementVariation(x, y, z, timewindow):
     """ Function  for calculate Movement Variation in time window series.
 
@@ -187,15 +203,37 @@ def movementVariation(x, y, z, timewindow):
                             z (list): Series data from z channel.
                             timewindow(int): Time window for separation series.
                         Returns:
-                            list: The return value sma. Size: time series/timewindow.
+                            list: The return value MV. Size: time series/timewindow.
     """
-    res = []
-    for i in range(math.floor(len(x) / timewindow)):
-        subpar = []
-        for j in range(timewindow):
-            subpar.append((abs(x[j + (timewindow * (i))])+abs(y[j + (timewindow * (i))])
-                           + abs(z[j + (timewindow * (i))])))
-        res.append(subpar[i]/timewindow)
+    resX = np.array(subfunc(x, timewindow))
+    resY = np.array(subfunc(y, timewindow))
+    resZ = np.array(subfunc(z, timewindow))
+    res = np.zeros(len(resX))
+    for i in range(len(resX)):
+        res[i] = (sum(abs(resX[i, 1:len(resX[i])] - resX[i, 0:len(resY[i]) - 1])) +
+                  sum(abs(resY[i, 1:len(resY[i])] - resY[i, 0:len(resY[i]) - 1])) +
+                  sum(abs(resZ[i, 1:len(resZ[i])] - resZ[i, 0:len(resZ[i]) - 1]))) / (len(resX[i]))
+    return res
+
+def entropy(x, y, z, timewindow):
+    """ Function for calculate entropy in time window series.
+
+                        Args:
+                            x (list): Series data from x channel.
+                            y (list): Series data from y channel.
+                            z (list): Series data from z channel.
+                            timewindow(int): Time window for separation series.
+                        Returns:
+                            list: The return value entropy. Size: time series/timewindow.
+    """
+    resX = np.array(subfunc(x, timewindow))
+    resY = np.array(subfunc(y, timewindow))
+    resZ = np.array(subfunc(z, timewindow))
+    res = np.zeros(len(resX))
+    for i in range(len(resX)):
+        res[i] = (sum(abs(resX[i, 1:len(resX[i])] - resX[i, 0:len(resY[i]) - 1])) +
+                  sum(abs(resY[i, 1:len(resY[i])] - resY[i, 0:len(resY[i]) - 1])) +
+                  sum(abs(resZ[i, 1:len(resZ[i])] - resZ[i, 0:len(resZ[i]) - 1]))) / (len(resX[i]))
     return res
 
 
@@ -225,7 +263,7 @@ def mobility(param, timewindow):
     """
     res = subfunc(param, timewindow)
     for i in range(math.floor(len(param) / timewindow)):
-        res[i] = np.std(np.diff(res[i])/np.std(res[i]))
+        res[i] = np.std(np.diff(res[i]) / np.std(res[i]))
     return res
 
 
@@ -241,7 +279,7 @@ def complexity(param, timewindow):
     res = subfunc(param, timewindow)
     for i in range(math.floor(len(param) / timewindow)):
         res[i] = (np.std(np.diff(np.diff(res[i]))) / np.std(np.diff(res[i]))
-                   / (np.std(np.diff(res[i])/np.std(res[i]))))
+                  / (np.std(np.diff(res[i]) / np.std(res[i]))))
     return res
 
 
@@ -276,4 +314,3 @@ def subfunc(param, timewindow):
             subpar.append(param[j + (timewindow * (i))])
         res.append(subpar)
     return res
-
