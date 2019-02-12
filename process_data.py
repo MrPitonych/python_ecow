@@ -102,92 +102,21 @@ Class = df['Class']
 np.seterr(all='print')
 
 # Calculate channels parameters
-#VeDBA = pr.vedba(Ax, Ay, Az)
-#VeDBA1 = pr.meanpar(VeDBA, 3500)
-activity = pr.activity(Ax, 3500)
-Ax = dtf.lowpassfilter(Ax, 0.05)
 Ax1 = pr.meanpar(Ax, 3500)  # #3500-1 min
 Ay1 = pr.meanpar(Ay, 3500)
 Az1 = pr.meanpar(Az, 3500)
-#SD = pr.sd(Ax, 3500)
-#SDy = pr.sd(Ay, 3500)
-#quan = pr.quantiles(Ax, 3500, 0.1)
+VeDBA = pr.vedba(Ax, Ay, Az)
+VeDBA1 = pr.meanpar(VeDBA, 3500)
+VeDBAmeanXYZ = pr.vedba(Ax1, Ay1, Az1)
+
 
 time1 = pr.meantime(time, 3500)
-print(time1)
+
 d={'time':time1,'gFx': Ax1,'gFy': Ay1, 'gFz':Az1}
 frame = pd.DataFrame(data =d)
 frame.to_csv('new_data2.csv', index=False)
 
-print(help(pr.meanpar))
 #It's for exam methods
-'''
-print("With Ay1, VeDBA1")
-f1 = [],[]
-for i in range(100):
-   (f1_rf, f1_lda) = main(Ay1, VeDBA1, Class)
-   f1[0].append(f1_rf)
-   f1[1].append(f1_lda)
 
-print("RF-median: ", float(np.median(f1[0])), "LDA-median: ", float(np.median(f1[1])))
-print("RF-min: ", float(np.min(f1[0])), "LDA-min: ", float(np.min(f1[1])))
-
-print("With VeDBA1, Az1")
-f1 = [],[]
-for i in range(100):
-   (f1_rf, f1_lda) = main(VeDBA1, Az1, Class)
-   f1[0].append(f1_rf)
-   f1[1].append(f1_lda)
-
-print("RF-median: ", float(np.median(f1[0])), "LDA-median: ", float(np.median(f1[1])))
-print("RF-min: ", float(np.min(f1[0])), "LDA-min: ", float(np.min(f1[1])))
-
-print("With VeDBA1, activity")
-f1 = [],[]
-for i in range(100):
-   (f1_rf, f1_lda) = main(VeDBA1,activity, Class)
-   f1[0].append(f1_rf)
-   f1[1].append(f1_lda)
-
-print("RF-median: ", float(np.median(f1[0])), "LDA-median: ", float(np.median(f1[1])))
-print("RF-min: ", float(np.min(f1[0])), "LDA-min: ", float(np.min(f1[1])))
-print("With VeDBA1, Ax1")
-f1 = [],[]
-for i in range(100):
-   (f1_rf, f1_lda) = main(VeDBA1, Ax1, Class)
-   f1[0].append(f1_rf)
-   f1[1].append(f1_lda)
-
-print("RF-median: ", float(np.median(f1[0])), "LDA-median: ", float(np.median(f1[1])))
-print("RF-min: ", float(np.min(f1[0])), "LDA-min: ", float(np.min(f1[1])))
-
-print("With VeDBA1, SD")
-f1 = [],[]
-for i in range(100):
-   (f1_rf, f1_lda) = main(VeDBA1, SD, Class)
-   f1[0].append(f1_rf)
-   f1[1].append(f1_lda)
-
-print("RF-median: ", float(np.median(f1[0])), "LDA-median: ", float(np.median(f1[1])))
-print("RF-min: ", float(np.min(f1[0])), "LDA-min: ", float(np.min(f1[1])))
-
-print("With VeDBA1, SDy")
-f1 = [],[]
-for i in range(100):
-   (f1_rf, f1_lda) = main(VeDBA1, SDy, Class)
-   f1[0].append(f1_rf)
-   f1[1].append(f1_lda)
-
-print("RF-median: ", float(np.median(f1[0])), "LDA-median: ", float(np.median(f1[1])))
-print("RF-min: ", float(np.min(f1[0])), "LDA-min: ", float(np.min(f1[1])))
-
-print("With VeDBA1, quan")
-f1 = [],[]
-for i in range(100):
-   (f1_rf, f1_lda) = main(VeDBA1, quan, Class)
-   f1[0].append(f1_rf)
-   f1[1].append(f1_lda)
-
-print("RF-median: ", float(np.median(f1[0])), "LDA-median: ", float(np.median(f1[1])))
-print("RF-min: ", float(np.min(f1[0])), "LDA-min: ", float(np.min(f1[1])))
-'''
+print(VeDBAmeanXYZ)
+print(VeDBA1)

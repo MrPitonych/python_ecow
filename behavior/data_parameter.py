@@ -178,6 +178,26 @@ def signalMagnitudeArea(x, y, z, timewindow):
         res.append(subpar[i]/timewindow)
     return res
 
+def movementVariation(x, y, z, timewindow):
+    """ Function  for calculate Movement Variation in time window series.
+
+                        Args:
+                            x (list): Series data from x channel.
+                            y (list): Series data from y channel.
+                            z (list): Series data from z channel.
+                            timewindow(int): Time window for separation series.
+                        Returns:
+                            list: The return value sma. Size: time series/timewindow.
+    """
+    res = []
+    for i in range(math.floor(len(x) / timewindow)):
+        subpar = []
+        for j in range(timewindow):
+            subpar.append((abs(x[j + (timewindow * (i))])+abs(y[j + (timewindow * (i))])
+                           + abs(z[j + (timewindow * (i))])))
+        res.append(subpar[i]/timewindow)
+    return res
+
 
 def activity(param, timewindow):
     """ Function  for calculate activity in time window series.
