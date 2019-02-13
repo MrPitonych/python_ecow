@@ -67,7 +67,7 @@ def odba(x, y, z):
                     y (list): Series data from y channel.
                     z (list): Series data from z channel.
                 Returns:
-                    list: The return value odba.Size: len(x)
+                    list: The return value odba. Size: len(x)
     """
     res = []
     for i in range(len(x)):  # test for length x=y=z
@@ -157,6 +157,118 @@ def paintkde(par, timewindow, n):
     pd.Series(res).plot(kind='kde')
     plt.show()
 
+
+# new
+def sumQuantilesMIN(param, timewindow, q=0.5, mode=1):
+    """ Function for sum of values that are less than quantiles in time series.
+
+            Args:
+                param (list): Series for filtering.
+                timewindow(int): Time window for separation series.
+                q (float): Quantile coefficient. Default 0.5(median).
+                mode (int): Operation mode, 1 = normal sum of values that are less than quantiles,
+                                            2 = sum of squares of values that are less than quantiles.
+                                            Default 1.
+            Returns:
+                list: The return value. Size: series/timewindow.
+    """
+    param = np.array(subfunc(param, timewindow))
+    res = np.zeros(len(param))
+    quantiles = np.zeros(len(param))
+
+    for i in range(len(param)):
+        quantiles[i] = np.quantile(param[i], q)
+
+    if mode == 1:
+
+        for i in range(len(param)):
+            for j in range(len(param[i])):
+                if param[i, j] < quantiles[i]:
+                    res[i] += param[i, j]
+    elif mode == 2:
+
+        for i in range(len(param)):
+            for j in range(len(param[i])):
+                if param[i, j] < quantiles[i]:
+                    res[i] += (param[i, j] ** 2)
+    return res
+
+# new
+def sumQuantilesMAX(param, timewindow, q=0.5, mode=1):
+    """ Function for sum of values that are less than quantiles in time series.
+
+            Args:
+                param (list): Series for filtering.
+                timewindow(int): Time window for separation series.
+                q (float): Quantile coefficient. Default 0.5(median).
+                mode (int): Operation mode, 1 = normal sum of values that are larger than quantiles,
+                                            2 = sum of squares of values that are larger than quantiles.
+                                            Default 1.
+            Returns:
+                list: The return value. Size: series/timewindow.
+    """
+    param = np.array(subfunc(param, timewindow))
+    res = np.zeros(len(param))
+    quantiles = np.zeros(len(param))
+
+    for i in range(len(param)):
+        quantiles[i] = np.quantile(param[i], q)
+
+    if mode == 1:
+
+        for i in range(len(param)):
+            for j in range(len(param[i])):
+                if param[i, j] > quantiles[i]:
+                    res[i] += param[i, j]
+    elif mode == 2:
+
+        for i in range(len(param)):
+            for j in range(len(param[i])):
+                if param[i, j] > quantiles[i]:
+                    res[i] += (param[i, j] ** 2)
+    return res
+
+
+def pairwiseDifferences(param, timeWindow):
+    """ Function for pairwise quantile differences in time series.
+
+               Args:
+                   param (list): Series for filtering.
+                   timewindow(int): Time window for separation series.
+               Returns:
+                   list: The return value. Size: series/timewindow.
+       """
+    res = subfunc(param, timeWindow)
+    q = np.quantile(res, [0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95])
+    counter = 0
+    for i in range(len(q) - 1):
+        for j in range((i + 1), len(q)):
+            res.insert(counter, q[j] - q[i])
+            counter = counter + 1
+    return res
+
+
+# new
+def AAD(x, y, z, timewindow):
+    """ Function  for calculate Average Absolute Difference (AAD)  in time window series .
+
+                       Args:
+                           x (list): Series data from x channel.
+                           y (list): Series data from y channel.
+                           z (list): Series data from z channel.
+                       Returns:
+                           list: The return value AAD. Size: len(x)
+       """
+    resX = np.array(subfunc(x, timewindow))
+    resY = np.array(subfunc(y, timewindow))
+    resZ = np.array(subfunc(z, timewindow))
+    res = np.zeros(len(resX))
+    s = np.sqrt((resX ** 2) + (resY ** 2) + (resZ ** 2))
+    for i in range(len(resX)):
+        res[i] = np.mean(abs(s[i] - np.mean(s[i])))
+    return res
+
+
 # new
 def averageIntensity(x, y, z):
     """ Function  for calculate Average Intensity (AI) in time window series .
@@ -173,6 +285,7 @@ def averageIntensity(x, y, z):
         res.append((math.sqrt(pow(x[i], 2) + pow(y[i], 2) + pow(z[i], 2))) / len(x))
     return res
 
+
 def signalMagnitudeArea(x, y, z, timewindow):
     """ Function  for calculate signal Magnitude Area in time window series.
 
@@ -188,10 +301,12 @@ def signalMagnitudeArea(x, y, z, timewindow):
     for i in range(math.floor(len(x) / timewindow)):
         subpar = []
         for j in range(timewindow):
-            subpar.append((abs(x[j + (timewindow * (i))]) + abs(y[j + (timewindow * (i))]) # тут бы на кол-во элементов поделить
-                           + abs(z[j + (timewindow * (i))])))
+            subpar.append(
+                (abs(x[j + (timewindow * (i))]) + abs(y[j + (timewindow * (i))])  # тут бы на кол-во элементов поделить
+                 + abs(z[j + (timewindow * (i))])))
         res.append(subpar[i] / timewindow)
     return res
+
 
 # new
 def movementVariation(x, y, z, timewindow):
@@ -215,6 +330,8 @@ def movementVariation(x, y, z, timewindow):
                   sum(abs(resZ[i, 1:len(resZ[i])] - resZ[i, 0:len(resZ[i]) - 1]))) / (len(resX[i]))
     return res
 
+
+# new
 def entropy(x, y, z, timewindow):
     """ Function for calculate entropy in time window series.
 
@@ -229,11 +346,32 @@ def entropy(x, y, z, timewindow):
     resX = np.array(subfunc(x, timewindow))
     resY = np.array(subfunc(y, timewindow))
     resZ = np.array(subfunc(z, timewindow))
+    Ts = resX + resY + resZ
     res = np.zeros(len(resX))
     for i in range(len(resX)):
-        res[i] = (sum(abs(resX[i, 1:len(resX[i])] - resX[i, 0:len(resY[i]) - 1])) +
-                  sum(abs(resY[i, 1:len(resY[i])] - resY[i, 0:len(resY[i]) - 1])) +
-                  sum(abs(resZ[i, 1:len(resZ[i])] - resZ[i, 0:len(resZ[i]) - 1]))) / (len(resX[i]))
+        res[i] = sum((1 + Ts[i, 0:len(Ts[i])]) * np.log(1 + abs(Ts[i, 0:len(Ts[i])]))) / len(resX[i])
+    return res
+
+
+# new
+def energy(x, y, z, timewindow):
+    """ Function for calculate energy in time window series.
+
+                        Args:
+                            x (list): Series data from x channel.
+                            y (list): Series data from y channel.
+                            z (list): Series data from z channel.
+                            timewindow(int): Time window for separation series.
+                        Returns:
+                            list: The return value energy. Size: time series/timewindow.
+    """
+    resX = np.array(subfunc(x, timewindow))
+    resY = np.array(subfunc(y, timewindow))
+    resZ = np.array(subfunc(z, timewindow))
+    TSS = (resX ** 2) + (resY ** 2) + (resZ ** 2)
+    res = np.zeros(len(resX))
+    for i in range(len(resX)):
+        res[i] = sum((TSS[i, 0:len(TSS[i])]) ** 2) / len(resX[i])
     return res
 
 
