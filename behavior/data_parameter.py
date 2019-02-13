@@ -158,97 +158,78 @@ def paintkde(par, timewindow, n):
     plt.show()
 
 
-# new
-def sumQuantilesMIN(param, timewindow, q=0.5, mode=1):
+def sumQuantilesMinMax(param, timewindow, q=0.5, mode=1):
     """ Function for sum of values that are less than quantiles in time series.
 
             Args:
                 param (list): Series for filtering.
                 timewindow(int): Time window for separation series.
                 q (float): Quantile coefficient. Default 0.5(median).
-                mode (int): Operation mode, 1 = normal sum of values that are less than quantiles,
+                mode (int): Operation mode: 1 = sum of values that are less than quantiles,
                                             2 = sum of squares of values that are less than quantiles.
+                                            3 = sum of values that are larger than quantiles,
+                                            4 = sum of squares of values that are larger than quantiles.
                                             Default 1.
             Returns:
                 list: The return value. Size: series/timewindow.
     """
-    param = np.array(subfunc(param, timewindow))
-    res = np.zeros(len(param))
-    quantiles = np.zeros(len(param))
+    res_param = np.array(subfunc(param, timewindow))
+    res = np.zeros(len(res_param))
+    quantiles = np.zeros(len(res_param))
 
-    for i in range(len(param)):
+    for i in range(len(res_param)):
         quantiles[i] = np.quantile(param[i], q)
 
     if mode == 1:
 
-        for i in range(len(param)):
-            for j in range(len(param[i])):
-                if param[i, j] < quantiles[i]:
-                    res[i] += param[i, j]
+        for i in range(len(res_param)):
+            for j in range(len(res_param[i])):
+                if res_param[i, j] < quantiles[i]:
+                    res[i] += res_param[i, j]
     elif mode == 2:
 
-        for i in range(len(param)):
-            for j in range(len(param[i])):
-                if param[i, j] < quantiles[i]:
-                    res[i] += (param[i, j] ** 2)
-    return res
+        for i in range(len(res_param)):
+            for j in range(len(res_param[i])):
+                if res_param[i, j] < quantiles[i]:
+                    res[i] += (res_param[i, j] ** 2)
+    elif mode == 3:
 
-# new
-def sumQuantilesMAX(param, timewindow, q=0.5, mode=1):
-    """ Function for sum of values that are less than quantiles in time series.
+        for i in range(len(res_param)):
+            for j in range(len(res_param[i])):
+                if res_param[i, j] > quantiles[i]:
+                    res[i] += res_param[i, j]
+    elif mode == 4:
 
-            Args:
-                param (list): Series for filtering.
-                timewindow(int): Time window for separation series.
-                q (float): Quantile coefficient. Default 0.5(median).
-                mode (int): Operation mode, 1 = normal sum of values that are larger than quantiles,
-                                            2 = sum of squares of values that are larger than quantiles.
-                                            Default 1.
-            Returns:
-                list: The return value. Size: series/timewindow.
-    """
-    param = np.array(subfunc(param, timewindow))
-    res = np.zeros(len(param))
-    quantiles = np.zeros(len(param))
-
-    for i in range(len(param)):
-        quantiles[i] = np.quantile(param[i], q)
-
-    if mode == 1:
-
-        for i in range(len(param)):
-            for j in range(len(param[i])):
-                if param[i, j] > quantiles[i]:
-                    res[i] += param[i, j]
-    elif mode == 2:
-
-        for i in range(len(param)):
-            for j in range(len(param[i])):
-                if param[i, j] > quantiles[i]:
-                    res[i] += (param[i, j] ** 2)
+        for i in range(len(res_param)):
+            for j in range(len(res_param[i])):
+                if res_param[i, j] > quantiles[i]:
+                    res[i] += (res_param[i, j] ** 2)
     return res
 
 
-def pairwiseDifferences(param, timeWindow):
+def pairwiseDifferences(param, timeWindow, q_first = 0.05, q_second = 0.1):
     """ Function for pairwise quantile differences in time series.
 
                Args:
                    param (list): Series for filtering.
                    timewindow(int): Time window for separation series.
+                   q_first(float): First quantile.
+                   q_second(float): Second quantile.
                Returns:
                    list: The return value. Size: series/timewindow.
        """
-    res = subfunc(param, timeWindow)
-    q = np.quantile(res, [0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95])
-    counter = 0
-    for i in range(len(q) - 1):
-        for j in range((i + 1), len(q)):
-            res.insert(counter, q[j] - q[i])
-            counter = counter + 1
+    res_param = subfunc(param, timeWindow)
+    res = np.zeros(len(res_param))
+    quantiles_first = np.zeros(len(res_param))
+    quantiles_second = np.zeros(len(res_param))
+
+    for i in range(len(res_param)):
+        quantiles_first[i] = np.quantile(res_param[i], q_first)
+        quantiles_second[i] = np.quantile(res_param[i], q_second)
+        res[i] = quantiles_second[i] - quantiles_first[i]
     return res
 
 
-# new
 def AAD(x, y, z, timewindow):
     """ Function  for calculate Average Absolute Difference (AAD)  in time window series .
 
@@ -269,7 +250,6 @@ def AAD(x, y, z, timewindow):
     return res
 
 
-# new
 def averageIntensity(x, y, z):
     """ Function  for calculate Average Intensity (AI) in time window series .
 
@@ -302,13 +282,12 @@ def signalMagnitudeArea(x, y, z, timewindow):
         subpar = []
         for j in range(timewindow):
             subpar.append(
-                (abs(x[j + (timewindow * (i))]) + abs(y[j + (timewindow * (i))])  # тут бы на кол-во элементов поделить
+                (abs(x[j + (timewindow * (i))]) + abs(y[j + (timewindow * (i))])
                  + abs(z[j + (timewindow * (i))])))
         res.append(subpar[i] / timewindow)
     return res
 
 
-# new
 def movementVariation(x, y, z, timewindow):
     """ Function  for calculate Movement Variation in time window series.
 
@@ -331,7 +310,6 @@ def movementVariation(x, y, z, timewindow):
     return res
 
 
-# new
 def entropy(x, y, z, timewindow):
     """ Function for calculate entropy in time window series.
 
@@ -353,7 +331,6 @@ def entropy(x, y, z, timewindow):
     return res
 
 
-# new
 def energy(x, y, z, timewindow):
     """ Function for calculate energy in time window series.
 

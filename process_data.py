@@ -11,13 +11,12 @@ from sklearn import metrics
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 import warnings
 
-warnings.filterwarnings("ignore") # It may be bad
+warnings.filterwarnings("ignore")  # It may be bad
 
 
 def loading(path):
-    df = pd.read_csv(path, usecols=['time','gFx', 'gFy', 'gFz'], sep=';', low_memory=False)
-    dictionary = {';': ',', ',': '.'}
-    df.replace(dictionary, regex=True, inplace=True)
+    df = pd.read_csv(path, usecols=['time', 'gFx', 'gFy', 'gFz'], sep=';', low_memory=False)
+    df.replace(',', '.', regex=True, inplace=True)
     print(df)
     df['time'] = pd.to_numeric(df['time'], errors='coerce')
     df.dropna(thresh=1)
@@ -27,7 +26,7 @@ def loading(path):
     return df
 
 
-def paintpar(x, par1, par2, par3): #*par
+def paintpar(x, par1, par2, par3):  # *par
     plt.figure()
     plt.plot(x, par1, "r", x, par2, "g", x, par3, "b")
     plt.legend(['r - 1', 'g - 2', 'b - 3'])
@@ -49,9 +48,9 @@ def createdataset(time, filename):
     return frame
 
 
-def main(par1, par2, Class, method =None):
-    f1_rf=0
-    f1_lda=0
+def main(par1, par2, Class, method=None):
+    f1_rf = 0
+    f1_lda = 0
     # clean noname class
     par1 = pd.Series(par1).drop(np.where(Class == 3)[0])
     par2 = pd.Series(par2).drop(np.where(Class == 3)[0])
@@ -62,31 +61,32 @@ def main(par1, par2, Class, method =None):
     if method != "LDA" and method != "RF" and method != None:
         print("This isn't correct a little")
         method = None
-    if method =="RF" or method == None:
+    if method == "RF" or method == None:
         # Instantiate model with 100 decision trees
         y_pred = tsm.randomforest(train_features, test_features, train_labels, 100)
         # Сalculation metrics
-        #print("Test Class :", train_labels)
-        #print("\nThis is Random Forest results :")
-        #print("Precision- RF:", metrics.precision_score(test_labels, y_pred, average=None))
-        #print("Recall-RF :", metrics.recall_score(test_labels, y_pred, average=None))
+        # print("Test Class :", train_labels)
+        # print("\nThis is Random Forest results :")
+        # print("Precision- RF:", metrics.precision_score(test_labels, y_pred, average=None))
+        # print("Recall-RF :", metrics.recall_score(test_labels, y_pred, average=None))
         f1_rf = metrics.f1_score(test_labels, y_pred, average='macro')
-        #print("F1-RF :", f1_rf)
+        # print("F1-RF :", f1_rf)
 
     if method == "LDA" or method == None:
         # display with lda
-        #tsm.lda((np.array([par1, par2])).transpose(), Class, ["Lying", "Standing", "Feeding"])
-        #plt.show()
+        # tsm.lda((np.array([par1, par2])).transpose(), Class, ["Lying", "Standing", "Feeding"])
+        # plt.show()
         # lda
         lda_1 = LinearDiscriminantAnalysis(n_components=2)
         x_r = lda_1.fit(train_features, train_labels)  # .transform(train_features)
         y_pred_lda = lda_1.predict(test_features)
-        #print("\n This is Linear Discriminant Analysis results :")
-        #print("Precision- LDA:", metrics.precision_score(test_labels, y_pred_lda, average=None))
-        #print("Recall-LDA :", metrics.recall_score(test_labels, y_pred_lda, average=None))
-        f1_lda =metrics.f1_score(test_labels, y_pred_lda, average='macro')
-        #print("F1 -LDA:",f1_lda )
-    return (f1_rf,f1_lda)
+        # print("\n This is Linear Discriminant Analysis results :")
+        # print("Precision- LDA:", metrics.precision_score(test_labels, y_pred_lda, average=None))
+        # print("Recall-LDA :", metrics.recall_score(test_labels, y_pred_lda, average=None))
+        f1_lda = metrics.f1_score(test_labels, y_pred_lda, average='macro')
+        # print("F1 -LDA:",f1_lda )
+    return f1_rf, f1_lda
+
 
 ActualData = loading('all_info.csv')
 time = ActualData['time']
@@ -105,34 +105,67 @@ np.seterr(all='print')
 Ax1 = pr.meanpar(Ax, 3500)  # #3500-1 min
 Ay1 = pr.meanpar(Ay, 3500)
 Az1 = pr.meanpar(Az, 3500)
-VeDBA = pr.vedba(Ax, Ay, Az)
-VeDBA1 = pr.meanpar(VeDBA, 3500)
-VeDBAmeanXYZ = pr.vedba(Ax1, Ay1, Az1)
 MV = pr.movementVariation(Ax, Ay, Az, 3500)
+
+Quanmin = pr.sumQuantilesMinMax(Ay, 3500, 0.5, 1)
+Quanminqud = pr.sumQuantilesMinMax(Ay, 3500, 0.5, 2)
+Quanmax = pr.sumQuantilesMinMax(Ay, 3500, 0.5, 3)
+Quanmaxqud = pr.sumQuantilesMinMax(Ay, 3500, 0.5, 4)
+Quan_diff = pr.pairwiseDifferences(Ay,3500, 0.05, 0.1)
 
 time1 = pr.meantime(time, 3500)
 
-d={'time':time1,'gFx': Ax1,'gFy': Ay1, 'gFz':Az1}
-frame = pd.DataFrame(data =d)
+d = {'time': time1, 'gFx': Ax1, 'gFy': Ay1, 'gFz': Az1}
+frame = pd.DataFrame(data=d)
 frame.to_csv('new_data2.csv', index=False)
 
-#It's for exam methods
-
-f1 = [],[]
+# It's for exam methods
+print("****************With MV, Quanmin****************")
+f1 = [], []
 for i in range(100):
-   (f1_rf, f1_lda) = main(MV, Quan05X, Class)
-   f1[0].append(f1_rf)
-   f1[1].append(f1_lda)
+    (f1_rf, f1_lda) = main(MV, Quanmin, Class)
+    f1[0].append(f1_rf)
+    f1[1].append(f1_lda)
 
 print("RF-median: ", float(np.median(f1[0])), "LDA-median: ", float(np.median(f1[1])))
 print("RF-min: ", float(np.min(f1[0])), "LDA-min: ", float(np.min(f1[1])))
 
-print("****************With VeDBA1, Quan05Xmean****************")
-f1 = [],[]
+print("****************With MV, Quanminqud****************")
+f1 = [], []
 for i in range(100):
-   (f1_rf, f1_lda) = main(MV, Quan05X, Class)
-   f1[0].append(f1_rf)
-   f1[1].append(f1_lda)
+    (f1_rf, f1_lda) = main(MV, Quanminqud, Class)
+    f1[0].append(f1_rf)
+    f1[1].append(f1_lda)
+
+print("RF-median: ", float(np.median(f1[0])), "LDA-median: ", float(np.median(f1[1])))
+print("RF-min: ", float(np.min(f1[0])), "LDA-min: ", float(np.min(f1[1])))
+
+print("****************With MV, Quanmax****************")
+f1 = [], []
+for i in range(100):
+    (f1_rf, f1_lda) = main(MV, Quanmax, Class)
+    f1[0].append(f1_rf)
+    f1[1].append(f1_lda)
+
+print("RF-median: ", float(np.median(f1[0])), "LDA-median: ", float(np.median(f1[1])))
+print("RF-min: ", float(np.min(f1[0])), "LDA-min: ", float(np.min(f1[1])))
+
+print("****************With MV, Quanmaxqud****************")
+f1 = [], []
+for i in range(100):
+    (f1_rf, f1_lda) = main(MV, Quanmaxqud, Class)
+    f1[0].append(f1_rf)
+    f1[1].append(f1_lda)
+
+print("RF-median: ", float(np.median(f1[0])), "LDA-median: ", float(np.median(f1[1])))
+print("RF-min: ", float(np.min(f1[0])), "LDA-min: ", float(np.min(f1[1])))
+
+print("****************With MV, Quan_diff****************")
+f1 = [], []
+for i in range(100):
+    (f1_rf, f1_lda) = main(MV, Quan_diff, Class)
+    f1[0].append(f1_rf)
+    f1[1].append(f1_lda)
 
 print("RF-median: ", float(np.median(f1[0])), "LDA-median: ", float(np.median(f1[1])))
 print("RF-min: ", float(np.min(f1[0])), "LDA-min: ", float(np.min(f1[1])))

@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def jerkFilter(x, y, z, dt):
+def jerk_filter(x, y, z, dt):
     jerk_x = x[dt:len(x)] - x[0:(len(x) - dt)]
     jerk_y = y[dt:len(y)] - y[0:(len(y) - dt)]
     jerk_z = z[dt:len(z)] - z[0:(len(z) - dt)]
